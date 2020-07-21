@@ -6,24 +6,30 @@ import {
   CardContent,
   Card
 } from '@material-ui/core';
-import InfoBox from './InfoBox'
-import Map from './Map'
-import Table from './Table'
+import InfoBox from './InfoBox';
+import Map from './Map';
+import Table from './Table';
 import './App.css';
-import { sortData } from './utils.js'
-import LineGraph from "./LineGraph"
+import { sortData, prettyPrintStat } from './utils.js';
+import LineGraph from "./LineGraph";
+import "leaflet/dist/leaflet.css";
 
 function App() {
   //state = how to write a variable in react
-  const [countries, setCountries] = useState({});
+  const [countries, setCountries] = useState([]);
   const [country, setCountry] = useState(['worldwide']);
   const [countryInfo, setCountryInfo] = useState({});
-  const [tableData, setTableData] = useState({});
+  const [tableData, setTableData] = useState([]);
+  // use them later lat: 34.80746, lng: -40.4796
+  const [mapCenter, setMapCenter] = useState({ lat: 0.00000, lng: 0.00000 });
+  const [mapZoom, setMapZoom] = useState(2);
+  const [mapCountries, setMapCountries] = useState([]);
+  const [casesType, setCasesType] = useState("cases");
 
   useEffect(() => {
     fetch('https://disease.sh/v3/covid-19/all')
-    .then((response => response.json()))
-    .then((data) => {
+    .then(response => response.json())
+    .then(data => {
       setCountryInfo(data);
     });
   }, [])
@@ -42,7 +48,8 @@ function App() {
           }));
 
           const sortedData = sortData(data);
-          setTableData(data);
+          setTableData(sortedData);
+          setMapCountries(data);
           setCountries(countries);
       });
     };
@@ -61,6 +68,9 @@ function App() {
     .then(data => {
       setCountry(countryCode);
       setCountryInfo(data);
+
+      setMapCenter([data.countryInfo.lat, data.countryInfo.long]);
+      setMapZoom(4);
     })
   };
 
@@ -68,8 +78,8 @@ function App() {
     <div className="app">
       <div className="app__left">
         <div className="app__header">
-          <h1>Lets build a covid19 tracker!!</h1>
-          <FormControl className="app_dropdown">
+          <h1>Covid19 Tracker</h1>
+          <FormControl className="app__dropdown">
             <Select variant="outlined" onChange={onCountryChange} value={country}>
               <MenuItem value="worldwide">Worldwide</MenuItem>
               {/* Loop through all countries and display the dropdown */}
@@ -81,26 +91,27 @@ function App() {
         </div>
 
         <div className="app__stats">
-          <InfoBox title="Coronavirus Cases" cases={countryInfo.todayCases} total={countryInfo.cases}/>
-          <InfoBox title="Recovered" cases={countryInfo.todayRecovered} total={countryInfo.recovered}/>
-          <InfoBox title="Deaths" cases={countryInfo.todayDeaths} total={countryInfo.deaths}/>
+          <InfoBox isRed active={casesType === "cases"} onClick={e => setCasesType("cases")} title="Coronavirus Cases" cases={prettyPrintStat(countryInfo.todayCases)} total={prettyPrintStat(countryInfo.cases)}/>
+          <InfoBox active={casesType === "recovered"} onClick={e => setCasesType("recovered")} title="Recovered" cases={prettyPrintStat(countryInfo.todayRecovered)} total={prettyPrintStat(countryInfo.recovered)}/>
+          <InfoBox isRed active={casesType === "deaths"} onClick={e => setCasesType("deaths")} title="Deaths" cases={prettyPrintStat(countryInfo.todayDeaths)} total={prettyPrintStat(countryInfo.deaths)}/>
         </div>
 
-        {/* Table */}
-
-        {/* Graph */}
-
-
-        {/* Map */}
-        <Map></Map>
+        <Map
+          casesType = {casesType}
+          countries = {mapCountries}
+          center = {mapCenter}
+          zoom = {mapZoom}
+        />
       </div>
 
-        <Card className="app__right">
-          <CardContent>
-            <h3></h3>
-          </CardContent>
-        </Card>
-
+      <Card className="app__right">
+        <CardContent>
+          <h3>Live Cases By country</h3>
+          <Table countries={tableData} />
+          <h3 className="app__graphTitle" >Worldwide new {casesType}</h3>
+          <LineGraph className="app__graph" casesType={casesType} />
+        </CardContent>
+      </Card>
     </div>
     
   );
