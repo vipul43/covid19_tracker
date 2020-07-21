@@ -1,7 +1,8 @@
 # covid19_tracker
 ## Credits to Sonny Sangha and Naz Dumansky from cleverprogrammer
 ## link to the youtube video: https://www.youtube.com/watch?v=cF3pIMJUZxM
-## Hosting using Firebase:
+## Hosting using Firebase: 
+## NOTE: The commands here are executed from npm directory(directory which contains package.json file of npm. For more details on npm [visit](https://github.com/vipul43/RemoteInternship))
 - create a firebase account using google account
 - go the console and create new project by filling in some details
 - install firebase tools in your npm directory by executing the command "npm i -g firebase-tools"
