@@ -15,3 +15,4 @@
 - Now create the build of your project by executing the command "npm run build"
 - Now to deploy, execute the command "firebase deploy"
 - Happy deploying!!!🤗
+- Note: If you made some changes to your app and want to deploy the updated one, rebuild the app using "npm run rebuild" and deploy the rebuilded version using "firebase deploy"
